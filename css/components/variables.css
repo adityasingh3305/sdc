@@ -1,0 +1,57 @@
+:root {
+  --bg-color: #050505;
+  --surface-color: rgba(20, 20, 20, 0.6);
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --accent-color: #ff4500;
+  --accent-glow: rgba(255, 69, 0, 0.15);
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: rgba(255, 255, 255, 0.35);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --font-main: 'Geist', system-ui, sans-serif;
+  --font-display: 'Geist', sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+  --bar-height: 72px;
+  --focus-ring: 0 0 0 2px var(--accent-glow), 0 0 0 1px var(--accent-color);
+}
+
+[data-accent="reddit"] {
+  --accent-color: #ff4500;
+  --accent-glow: rgba(255, 69, 0, 0.15);
+}
+
+[data-accent="blue"] {
+  --accent-color: #3b82f6;
+  --accent-glow: rgba(59, 130, 246, 0.15);
+}
+
+[data-accent="green"] {
+  --accent-color: #22c55e;
+  --accent-glow: rgba(34, 197, 94, 0.15);
+}
+
+[data-accent="purple"] {
+  --accent-color: #a855f7;
+  --accent-glow: rgba(168, 85, 247, 0.15);
+}
+
+[data-accent="gold"] {
+  --accent-color: #eab308;
+  --accent-glow: rgba(234, 179, 8, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+body {
+  background: var(--bg-color);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  overflow: hidden;
+  height: 100vh;
+  position: relative;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
