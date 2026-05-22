@@ -1,9 +1,20 @@
+import { Capacitor } from '@capacitor/core';
 import { API_BASE, POSTS_PER_PAGE } from "./constants.js";
 
 export class RedditAPI {
   constructor({ baseUrl = API_BASE, limit = POSTS_PER_PAGE } = {}) {
     this.baseUrl = baseUrl;
     this.postsPerPage = limit;
+    this.isNative = Capacitor.isNativePlatform();
+    // Lazy-import Http only on native to avoid import issues on web
+    this._Http = null;
+  }
+
+  async _getHttpModule() {
+    if (!this._Http) {
+      this._Http = await import('@capacitor/core');
+    }
+    return this._Http;
   }
 
   normalizeSubredditInput(input) {
@@ -47,8 +58,25 @@ export class RedditAPI {
   async fetchData(endpoint, params = new URLSearchParams()) {
     const url = new URL(`${this.baseUrl}${endpoint}`, window.location.origin);
     params.forEach((value, key) => url.searchParams.append(key, value));
+    const fullUrl = url.toString();
 
-    const res = await fetch(url.toString());
+    if (this.isNative) {
+      const mod = await this._getHttpModule();
+      const response = await mod.CapacitorHttp.get({
+        url: fullUrl,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.82 Mobile Safari/537.36',
+          'Accept': 'application/json',
+        },
+      });
+      // CapacitorHttp wraps the body in a data property; response.data is already parsed JSON
+      if (typeof response.data === 'object' && response.data !== null) {
+        return response.data;
+      }
+      throw new Error(`Capacitor HTTP request failed: ${JSON.stringify(response)}`);
+    }
+
+    const res = await fetch(fullUrl);
     if (!res.ok) {
       throw new Error(`Request failed with status ${res.status} — ${res.statusText}`);
     }

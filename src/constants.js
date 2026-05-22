@@ -40,5 +40,5 @@ export const SHARE_COPIED_DURATION = 1500;
 
 export const REDGIFS_BASE = "https://media.redgifs.com/";
 
-export const API_BASE = Capacitor.isNativePlatform() ? "https://old.reddit.com" : "/api/reddit";
+export const API_BASE = Capacitor.isNativePlatform() ? "https://www.reddit.com" : "/api/reddit";
 export const POSTS_PER_PAGE = "25";
