@@ -4,5 +4,10 @@
   "webDir": "dist",
   "android": {
     "path": "app"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
   }
 }
