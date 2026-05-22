@@ -1,0 +1,8 @@
+{
+  "appId": "com.redditscroller.app",
+  "appName": "Reddit Scroller",
+  "webDir": "dist",
+  "android": {
+    "path": "app"
+  }
+}
