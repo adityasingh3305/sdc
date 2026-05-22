@@ -62,7 +62,7 @@ class RedditScroller {
       localStorage.getItem(STORAGE_KEY) || "[]",
     );
     this.globalVolume = 1.0;
-    this.globalMuted = true;
+    this.globalMuted = false;
     this.masonryCols = [];
     this.colCount = 1;
     this.resizeTimer = null;
