@@ -104,7 +104,7 @@
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
-  max-height: 260px;
+  max-height: 420px;
   overflow-y: auto;
   display: none;
   z-index: 2000;
@@ -197,6 +197,15 @@
   .search-input { padding: 0.45rem 0.85rem 0.45rem 2rem; font-size: 0.82rem; }
   .icon-btn { width: 32px; height: 32px; font-size: 0.9rem; }
   .accent-popover { right: -36px; }
+
+  /* ── Mobile Search Expand ──────────────────────────────────── */
+  .search-expand .app-brand,
+  .search-expand .accent-toggle-wrap,
+  .search-expand #blacklistBtn {
+    display: none;
+  }
+  .search-expand .search-wrap { flex: 1 1 100%; }
+  .search-expand .top-bar-inner { gap: 0; }
   .accent-popover::before {
     content: '';
     position: absolute;

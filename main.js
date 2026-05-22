@@ -46,6 +46,7 @@ class RedditScroller {
     this.closeCommentsBtn = document.getElementById("closeComments");
     this.accentToggle = document.getElementById("accentToggle");
     this.accentPopover = document.getElementById("accentPopover");
+    this.muteToggle = document.getElementById("muteToggle");
 
     this.currentSubreddit = "all";
     this.currentSort = "hot";
@@ -179,6 +180,11 @@ class RedditScroller {
     document
       .getElementById("closeReel")
       .addEventListener("click", () => this.closeReel());
+
+    if (this.muteToggle) {
+      this.muteToggle.addEventListener("click", () => this.toggleMute());
+    }
+
     document.addEventListener("keydown", (e) => {
       if (this.reelMode) {
         if (e.key === "Escape") {
@@ -311,6 +317,19 @@ class RedditScroller {
 
     document.addEventListener("click", (e) => {
       if (!sortPills.contains(e.target)) closeSortSubmenus();
+    });
+
+    // Mobile search expand — hides brand + icon buttons on focus, restores on blur
+    this.searchInput.addEventListener("focus", () => {
+      if (window.innerWidth <= 600) {
+        this.topBar.classList.add("search-expand");
+      }
+    });
+    this.searchInput.addEventListener("blur", () => {
+      // Small delay so click on suggestion items registers before the layout shifts
+      setTimeout(() => {
+        this.topBar.classList.remove("search-expand");
+      }, 200);
     });
 
     let timeout;
@@ -532,6 +551,17 @@ class RedditScroller {
           vid.volume = this.globalVolume;
         }
       }
+    });
+  }
+
+  toggleMute() {
+    this.globalMuted = !this.globalMuted;
+    const icon = this.muteToggle?.querySelector("i");
+    if (icon) {
+      icon.className = this.globalMuted ? "bi bi-volume-mute-fill" : "bi bi-volume-up-fill";
+    }
+    document.querySelectorAll("video").forEach((vid) => {
+      vid.muted = this.globalMuted;
     });
   }
 
@@ -1542,7 +1572,7 @@ class RedditScroller {
   }
 
   initAccent() {
-    const saved = localStorage.getItem("rscroller_accent") || "reddit";
+    const saved = localStorage.getItem("rscroller_accent") || "green";
     document.documentElement.setAttribute("data-accent", saved);
   }
 

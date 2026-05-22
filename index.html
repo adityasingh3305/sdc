@@ -33,9 +33,9 @@
         <div class="accent-toggle-wrap">
           <button class="icon-btn" id="accentToggle" title="Accent color" aria-label="Choose accent color" aria-haspopup="true" aria-expanded="false" aria-controls="accentPopover"><i class="bi bi-palette"></i></button>
           <div class="accent-popover" id="accentPopover" role="menu" aria-label="Accent color options">
-            <button class="accent-swatch active" data-accent="reddit" style="background:#ff4500" aria-label="Reddit orange" role="menuitemradio" aria-checked="true"></button>
+            <button class="accent-swatch" data-accent="reddit" style="background:#ff4500" aria-label="Reddit orange" role="menuitemradio" aria-checked="false"></button>
             <button class="accent-swatch" data-accent="blue" style="background:#3b82f6" aria-label="Blue" role="menuitemradio" aria-checked="false"></button>
-            <button class="accent-swatch" data-accent="green" style="background:#22c55e" aria-label="Green" role="menuitemradio" aria-checked="false"></button>
+            <button class="accent-swatch active" data-accent="green" style="background:#22c55e" aria-label="Green" role="menuitemradio" aria-checked="true"></button>
             <button class="accent-swatch" data-accent="purple" style="background:#a855f7" aria-label="Purple" role="menuitemradio" aria-checked="false"></button>
             <button class="accent-swatch" data-accent="gold" style="background:#eab308" aria-label="Gold" role="menuitemradio" aria-checked="false"></button>
           </div>
@@ -85,6 +85,9 @@
     <!-- ── Reel View Overlay ─────────────────────────────────────── -->
     <div id="reelView" class="reel-view">
       <button class="reel-close" id="closeReel" aria-label="Close reel view"><i class="bi bi-arrow-left"></i></button>
+      <button class="reel-mute-btn" id="muteToggle" aria-label="Toggle sound" title="Toggle sound">
+        <i class="bi bi-volume-mute-fill"></i>
+      </button>
       <div id="app" class="reel-feed">
         <div id="loader" class="loader"><div class="spinner"></div></div>
       </div>

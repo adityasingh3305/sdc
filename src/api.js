@@ -111,6 +111,7 @@ export class RedditAPI {
       new URLSearchParams({
         query,
         include_over_18: "true",
+        limit: "10",
       }),
     );
   }
