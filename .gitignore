@@ -12,9 +12,6 @@ dist
 dist-ssr
 *.local
 
-# scrollx.org (separate Next.js site)
-scrollx.org/
-
 # Test files
 test/
 vitest.config.js
@@ -30,5 +27,3 @@ vitest.config.js
 *.njsproj
 *.sln
 *.sw?
-.git_disabled/
-
