@@ -143,9 +143,9 @@ class RedditScroller {
             video.muted = this.globalMuted;
             video.volume = this.globalVolume;
             video.play().catch(() => {
-              if (video.muted) {
-                video.play().catch(() => {});
-              }
+              // If unmuted play fails (e.g. autoplay policy), fall back to muted
+              video.muted = true;
+              video.play().catch(() => {});
             });
           } else {
             video.pause();
@@ -1022,9 +1022,12 @@ class RedditScroller {
 
       let contentHtml = "";
       if (processed.type === "video") {
-        contentHtml = `<video loop playsinline controls preload="metadata" referrerpolicy="no-referrer" poster="${sanitizeText(safeUrl(processed.poster || ""))}" src="${sanitizeText(safeUrl(processed.source || ""))}" data-hls-source="${sanitizeText(safeUrl(processed.hlsSource || ""))}" data-fallback="${sanitizeText(safeUrl(processed.fallbackSource || processed.source || ""))}">
-          ${processed.sources.map((s) => `<source src="${sanitizeText(safeUrl(s.src))}" type="${sanitizeText(s.type)}">`).join("")}
-        </video>`;
+        contentHtml = `<div class="video-wrapper" data-video-wrapper>
+          <video loop playsinline webkit-playsinline controls preload="metadata" referrerpolicy="no-referrer" poster="${sanitizeText(safeUrl(processed.poster || ""))}" src="${sanitizeText(safeUrl(processed.source || ""))}" data-hls-source="${sanitizeText(safeUrl(processed.hlsSource || ""))}" data-fallback="${sanitizeText(safeUrl(processed.fallbackSource || processed.source || ""))}">
+            ${processed.sources.map((s) => `<source src="${sanitizeText(safeUrl(s.src))}" type="${sanitizeText(s.type)}">`).join("")}
+          </video>
+          <div class="video-tap-overlay" data-video-tap></div>
+        </div>`;
       } else if (processed.type === "embed") {
         contentHtml = `<div class="embed-container">${processed.html}</div>`;
       } else if (processed.type === "gallery") {
@@ -1065,22 +1068,27 @@ class RedditScroller {
           }
         });
         
-        video.addEventListener("click", (e) => {
-          if (video.paused) {
-            video.play().catch(() => {
-              if (!video.muted) {
-                video.dataset.blockSync = "true";
+        // Use overlay div for reliable tap handling (native video controls swallow events on Android)
+        const wrapper = video.closest("[data-video-wrapper]");
+        const overlay = wrapper?.querySelector("[data-video-tap]");
+        if (overlay) {
+          overlay.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (video.paused) {
+              video.muted = this.globalMuted;
+              video.play().catch(() => {
                 video.muted = true;
-                video.play().catch(() => {});
-                setTimeout(() => {
-                  delete video.dataset.blockSync;
-                }, 0);
-              }
-            });
-          } else {
-            video.pause();
-          }
-        });
+                video.play().then(() => {
+                  if (!this.globalMuted) {
+                    setTimeout(() => { video.muted = false; }, 100);
+                  }
+                }).catch(() => {});
+              });
+            } else {
+              video.pause();
+            }
+          });
+        }
       });
       if (!processed.source && processed.hlsSource) this.initHls(data.name, processed.hlsSource);
 
