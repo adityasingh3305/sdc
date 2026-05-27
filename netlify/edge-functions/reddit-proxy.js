@@ -4,17 +4,27 @@ export default async (request, context) => {
 
     // Strip the /api/reddit prefix to get the raw Reddit path
     const redditPath = url.pathname.replace(/^\/api\/reddit/, '');
-    const redditUrl = `https://www.reddit.com${redditPath}${url.search}`;
+    // Use old.reddit.com — ScrollX uses this instead of www.reddit.com
+    // because old Reddit has far less aggressive server-side bot detection.
+    const redditUrl = `https://old.reddit.com${redditPath}${url.search}`;
 
     console.log(`[reddit-proxy] Proxying: ${redditPath}${url.search}`);
 
-    // Reddit blocks non-browser User-Agents with 403.
-    // We must send a real browser UA + matching headers to get valid responses.
+    // Reddit validates that requests look like they come from a real browser
+    // visiting reddit.com itself. sec-fetch-site=same-origin is the key header.
     const response = await fetch(redditUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
         'Accept': 'application/json, text/plain, */*',
         'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': 'https://www.reddit.com/',
+        'Origin': 'https://www.reddit.com',
+        'sec-ch-ua': '"Google Chrome";v="125", "Chromium";v="125", "Not=A?Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
         'Cache-Control': 'no-cache',
         'Pragma': 'no-cache',
       },
