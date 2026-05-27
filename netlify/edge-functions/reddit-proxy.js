@@ -1,9 +1,9 @@
 export default async (request, context) => {
   try {
     const url = new URL(request.url);
-    const redditPath = url.pathname
-      .replace(/^\/api\/reddit/, '')
-      .replace(/^\/\.netlify\/functions\/reddit-proxy/, '');
+
+    // Strip the /api/reddit prefix to get the raw Reddit path
+    const redditPath = url.pathname.replace(/^\/api\/reddit/, '');
     const redditUrl = `https://www.reddit.com${redditPath}${url.search}`;
 
     console.log(`[reddit-proxy] Proxying: ${redditPath}${url.search}`);
@@ -37,5 +37,5 @@ export default async (request, context) => {
 };
 
 export const config = {
-  path: "/api/reddit/*",
+  path: '/api/reddit/*',
 };
