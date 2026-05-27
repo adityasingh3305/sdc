@@ -8,10 +8,15 @@ export default async (request, context) => {
 
     console.log(`[reddit-proxy] Proxying: ${redditPath}${url.search}`);
 
+    // Reddit blocks non-browser User-Agents with 403.
+    // We must send a real browser UA + matching headers to get valid responses.
     const response = await fetch(redditUrl, {
       headers: {
-        'User-Agent': 'RedditScroller/1.0 (by /u/adityasingh3305)',
-        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
       },
     });
 
@@ -22,6 +27,7 @@ export default async (request, context) => {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=60',
       },
     });
   } catch (error) {
@@ -39,3 +45,4 @@ export default async (request, context) => {
 export const config = {
   path: '/api/reddit/*',
 };
+
