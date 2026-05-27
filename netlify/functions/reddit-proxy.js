@@ -1,24 +1,39 @@
 export default async (request, context) => {
-  const url = new URL(request.url);
-  const redditPath = url.pathname.replace(/^\/\.netlify\/functions\/reddit-proxy/, '');
-  const redditUrl = `https://www.reddit.com${redditPath}${url.search}`;
+  try {
+    const url = new URL(request.url);
+    const redditPath = url.pathname
+      .replace(/^\/api\/reddit/, '')
+      .replace(/^\/\.netlify\/functions\/reddit-proxy/, '');
+    const redditUrl = `https://www.reddit.com${redditPath}${url.search}`;
 
-  const response = await fetch(redditUrl, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-      'Accept': 'application/json',
-    },
-  });
+    console.log(`[reddit-proxy] Proxying: ${redditPath}${url.search}`);
 
-  const body = await response.text();
+    const response = await fetch(redditUrl, {
+      headers: {
+        'User-Agent': 'RedditScroller/1.0 (by /u/adityasingh3305)',
+        'Accept': 'application/json',
+      },
+    });
 
-  return new Response(body, {
-    status: response.status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    },
-  });
+    const body = await response.text();
+
+    return new Response(body, {
+      status: response.status,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  } catch (error) {
+    console.error(`[reddit-proxy] Error: ${error.message}`);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  }
 };
 
 export const config = {
