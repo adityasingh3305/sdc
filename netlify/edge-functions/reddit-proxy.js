@@ -1,32 +1,63 @@
+// Module-level token cache — persists across requests within the same edge isolate.
+let cachedToken = null;
+let tokenExpiresAt = 0;
+
+async function getAccessToken() {
+  const now = Date.now();
+  // Return cached token if still valid (with 60s buffer)
+  if (cachedToken && now < tokenExpiresAt - 60_000) {
+    return cachedToken;
+  }
+
+  const clientId = Deno.env.get('REDDIT_CLIENT_ID');
+  const clientSecret = Deno.env.get('REDDIT_CLIENT_SECRET');
+
+  if (!clientId || !clientSecret) {
+    throw new Error('Missing REDDIT_CLIENT_ID or REDDIT_CLIENT_SECRET env vars');
+  }
+
+  // Reddit App-Only OAuth — client_credentials grant
+  const credentials = btoa(`${clientId}:${clientSecret}`);
+  const res = await fetch('https://www.reddit.com/api/v1/access_token', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${credentials}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': 'RedditScroller/1.0 by /u/adityasingh3305',
+    },
+    body: 'grant_type=client_credentials',
+  });
+
+  if (!res.ok) {
+    throw new Error(`OAuth token fetch failed: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  cachedToken = data.access_token;
+  // expires_in is in seconds (Reddit tokens last 1 hour)
+  tokenExpiresAt = now + data.expires_in * 1000;
+  return cachedToken;
+}
+
 export default async (request, context) => {
   try {
     const url = new URL(request.url);
 
     // Strip the /api/reddit prefix to get the raw Reddit path
     const redditPath = url.pathname.replace(/^\/api\/reddit/, '');
-    // Use old.reddit.com — ScrollX uses this instead of www.reddit.com
-    // because old Reddit has far less aggressive server-side bot detection.
-    const redditUrl = `https://old.reddit.com${redditPath}${url.search}`;
+
+    // oauth.reddit.com — authenticated requests bypass IP-based blocking entirely
+    const redditUrl = `https://oauth.reddit.com${redditPath}${url.search}`;
 
     console.log(`[reddit-proxy] Proxying: ${redditPath}${url.search}`);
 
-    // Reddit validates that requests look like they come from a real browser
-    // visiting reddit.com itself. sec-fetch-site=same-origin is the key header.
+    const token = await getAccessToken();
+
     const response = await fetch(redditUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Referer': 'https://www.reddit.com/',
-        'Origin': 'https://www.reddit.com',
-        'sec-ch-ua': '"Google Chrome";v="125", "Chromium";v="125", "Not=A?Brand";v="24"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
+        'Authorization': `Bearer ${token}`,
+        'User-Agent': 'RedditScroller/1.0 by /u/adityasingh3305',
+        'Accept': 'application/json',
       },
     });
 
@@ -55,4 +86,3 @@ export default async (request, context) => {
 export const config = {
   path: '/api/reddit/*',
 };
-
